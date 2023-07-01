@@ -263,13 +263,13 @@ async def submit_image(interaction, charactername: str, imagelink: str):
 @app_commands.checks.has_permissions(administrator=True)
 async def approve_images(interaction):
 
-  # --- helper functions ---
+  # - helper functions -
 
   # Our check for the reaction - author
   def check(reaction, user):
     return user == interaction.user  # We check that only the authors reaction counts
 
-  # --- actual code ---
+  # - actual code -
 
   # initial message to start approval process
   embed = embeds.message_embed(
