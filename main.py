@@ -6,6 +6,8 @@ from discord import app_commands
 from discord.ext.commands import MissingPermissions
 import os
 
+from keep_alive import keep_alive
+
 import database
 import embeds
 
@@ -516,6 +518,7 @@ async def approve_phrases_error(interaction, error):
 # --- run bot ---
 
 try:
+  keep_alive()
   client.run(os.getenv("TOKEN"))
 except discord.HTTPException as e:
   if e.status == 429:
