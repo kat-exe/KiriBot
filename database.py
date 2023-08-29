@@ -22,6 +22,7 @@ connection.commit()
 
 # get data
 
+
 def add_character(character):
   try:
     connection.execute(
@@ -40,18 +41,17 @@ def return_character(name):
 
 
 def id_return_character(id):
-  result = connection.execute(
-    f"SELECT * FROM characters WHERE id = '{id}';")
+  result = connection.execute(f"SELECT * FROM characters WHERE id = '{id}';")
   return result.fetchall()
+
 
 def id_return_phrase(id):
-  result = connection.execute(
-    f"SELECT phrase FROM phrases WHERE id = '{id}';")
+  result = connection.execute(f"SELECT phrase FROM phrases WHERE id = '{id}';")
   return result.fetchall()
 
+
 def id_return_image(id):
-  result = connection.execute(
-    f"SELECT link FROM images WHERE id = '{id}';")
+  result = connection.execute(f"SELECT link FROM images WHERE id = '{id}';")
   return result.fetchall()
 
 
@@ -62,13 +62,25 @@ def return_all():
 
 def get_for_approval(type):
   if type == "characters":
-    result = connection.execute("SELECT name FROM characters WHERE approved = 0;")
+    result = connection.execute(
+      "SELECT name FROM characters WHERE approved = 0;")
   elif type == "phrases":
-    result = connection.execute("SELECT phrase, characterID FROM phrases WHERE approved = 0;")
+    result = connection.execute(
+      "SELECT phrase, characterID FROM phrases WHERE approved = 0;")
   elif type == "images":
-    result = connection.execute("SELECT link, characterID FROM images WHERE approved = 0;")
+    result = connection.execute(
+      "SELECT link, characterID FROM images WHERE approved = 0;")
   else:
     return None
+  return result.fetchall()
+
+
+def get_character_images(charactername):
+  charId = connection.execute(
+    f"SELECT id FROM characters WHERE name = '{charactername}';")
+  charId = charId.fetchone()
+  result = connection.execute(
+    f"SELECT link FROM images WHERE approved = 1 AND characterID = {charId[0]};")
   return result.fetchall()
 
 
@@ -96,7 +108,9 @@ def deny_character(name):
 def add_image(charactername, link):
   try:
     characterID = return_character(charactername)
-    connection.execute(f"INSERT INTO images (characterID, link) VALUES ('{characterID[0][0]}', '{link}');")
+    connection.execute(
+      f"INSERT INTO images (characterID, link) VALUES ('{characterID[0][0]}', '{link}');"
+    )
     connection.commit()
   except:
     return False
@@ -128,7 +142,9 @@ def deny_image(link):
 def add_phrase(charactername, phrase):
   try:
     characterID = return_character(charactername)
-    connection.execute(f"INSERT INTO phrases (characterID, phrase) VALUES ('{characterID[0][0]}', '{phrase}');")
+    connection.execute(
+      f'INSERT INTO phrases (characterID, phrase) VALUES ("{characterID[0][0]}", "{phrase}");'
+    )
     connection.commit()
   except:
     return False
@@ -139,7 +155,7 @@ def add_phrase(charactername, phrase):
 def accept_phrase(phrase):
   try:
     connection.execute(
-      f"UPDATE phrases SET approved = 1 WHERE phrase = '{phrase}';")
+      f'UPDATE phrases SET approved = 1 WHERE phrase = "{phrase}";')
     connection.commit()
   except:
     return False
@@ -149,7 +165,7 @@ def accept_phrase(phrase):
 
 def deny_phrase(phrase):
   try:
-    connection.execute(f"DELETE FROM phrases WHERE phrase = '{phrase}';")
+    connection.execute(f'DELETE FROM phrases WHERE phrase = "{phrase}";')
     connection.commit()
   except:
     return False
@@ -164,21 +180,25 @@ def generate_post(character):
     characterID = characterInfo[0][0]
 
     # counts for randint
-    imageIDs = connection.execute(f"SELECT id FROM images WHERE (approved = 1 AND characterID = {characterID});")
+    imageIDs = connection.execute(
+      f"SELECT id FROM images WHERE (approved = 1 AND characterID = {characterID});"
+    )
     imageIDs = imageIDs.fetchall()
-    phraseIDs = connection.execute(f"SELECT id FROM phrases WHERE (approved = 1 AND characterID = {characterID});")
+    phraseIDs = connection.execute(
+      f"SELECT id FROM phrases WHERE (approved = 1 AND characterID = {characterID});"
+    )
     phraseIDs = phraseIDs.fetchall()
 
     # get random images and phrases
     randomImage = random.randint(0, len(imageIDs) - 1)
     randomPhrase = random.randint(0, len(phraseIDs) - 1)
-  
+
     imageID = imageIDs[randomImage][0]
     phraseID = phraseIDs[randomPhrase][0]
 
     image = id_return_image(imageID)
     phrase = id_return_phrase(phraseID)
-    
+
     #return f"imageIDs: {imageIDs}, randImage: {randomImage}, image: {imageID}"
     return phrase, image
   except:
